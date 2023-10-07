@@ -17,7 +17,20 @@
 
     <modules>
         <module>server</module>
+        <module>app-server</module>
+        <module>app-service</module>
+        <module>app-service-impl</module>
+        <module>app-service-impl-20231007</module>
+        <module>app-service-impl-wechat</module>
+        <module>app-service-impl-alipay</module>
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+    </dependencies>
 
 
 </project>

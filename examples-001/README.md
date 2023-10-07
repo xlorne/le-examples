@@ -53,12 +53,12 @@ public class DemoController {
 
 ```
 
-## Service层的问题介绍
+## Service层使用时的局限性介绍
 
 在上述的例子过程中，我们定义了接口和实现，然后在项目中使用接口调用业务，由于接口与实现的分离感觉像是用了非常好的解耦效果，但是实际作用多大呢，下面我们以不同的场景，分析service层在运用时所存在的局限问题。
 
 下面以场景举例，说明  
-### 当需要重写service的逻辑时，该怎么做？  
+### 当需要重写service的逻辑时  
 假如我们需要将hello方法的返回信息，更改为`new Hello World!`，通常大家的处理方式是直接修改DemoServiceImpl的代码。例如：  
 ```java
 
@@ -77,7 +77,7 @@ public class DemoServiceImpl implements DemoService {
 总结来说：    
 这个场景表达的含义是业务需求做了调整，对于我们实现来说不得不去修改逻辑来应对调整，但是当我们这样去做了以后，将感觉不到service层接口定义的任何价值，只会感觉到service的接口需要多建一个类反而更加麻烦。
 
-### 差异化的业务逻辑，该如何应对？
+### 当存在差异化的业务逻辑时
 
 假如我们开发一个支付系统，作为标准的产品我们支持多种支付方式，例如：微信支付、支付宝支付等，但是系统在上线时需要配置其选择的支付方式，那么我们该如何实现呢？
 
@@ -180,7 +180,7 @@ public class PayController {
 当我们需要切换不同Service的实现的时候，还需要做额外的处理，不然在直接注入Service的时候还将会出现错误。通过@Qualifier指定具体的实现，可以解决这个问题，但是这样的处理方式，将会导致Service接口层的定义变得没有意义，因为我们在使用的时候，还需要指定具体的实现，这样的话，我们直接使用实现类不就可以了吗？  
 
 
-### 当需要兼容适配不同场景时，该怎么做？
+### 当需要同时兼容多种场景时
 
 假如我们的支付功能，需要同时支持微信和支付宝两种不同方式的支付方式，那么我们的service层应该如何设计？
 
@@ -309,4 +309,40 @@ public class BalancePayServiceImpl implements PayService {
 }
 
 ```
+## 利用模块分离来解决service层的局限性
 
+我们简单的将示例功能代码分为app-server、app-service、app-service-impl三个模块，其中app-server为服务接口模块，app-service为service定义层，app-service-impl为service实现层。根据业务的需求app-service-impl有细分为app-service-impl-alipay和app-service-impl-wechat等不同的实现模块。
+
+![模块分离](images/img_1.png)
+依赖关系如下：
+```
+app-service 没有依赖
+app-server -> app-service app-service-impl app-service-impl-alipay app-service-impl-wechat
+app-service-impl -> app-service
+app-service-impl-alipay -> app-service
+app-service-impl-wechat -> app-service
+```
+
+对应上述局限性的场景，我们分别来看看如何解决。
+
+### 当需要重写service的逻辑时
+
+对应直接修改代码的方式，依旧可以通过直接修改对应的实现来支持。除此以外，由于引入了module的概念以后，代码将为分为不同的版本，我们可以通过不同的版本来支持不同的业务逻辑。例如：
+
+app-service-impl-20231007版本的DemoServiceImpl代码如下：
+
+```java
+import com.lease.examples.le001.server.service.DemoService;
+import org.springframework.stereotype.Service;
+
+@Service
+public class DemoServiceImpl implements DemoService {
+
+    @Override
+    public String hello() {
+        return "new Hello World!";
+    }
+}
+
+```
+在项目app-server中只需要修改引入的module就可以切换对应的版本。还可以直接替换对应的jar包来实现。
