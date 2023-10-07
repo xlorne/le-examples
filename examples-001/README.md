@@ -147,9 +147,9 @@ APPLICATION FAILED TO START
 
 Description:
 
-Parameter 0 of constructor in com.lease.examples.le001.server.controller.PayController required a single bean, but 2 were found:
-	- alipayPayServiceImpl: defined in file [C:\Users\linqu\developer\github\le-examples\examples-001\server\target\classes\com\lease\examples\le001\server\service\impl\AlipayPayServiceImpl.class]
-	- wechatPayServiceImpl: defined in file [C:\Users\linqu\developer\github\le-examples\examples-001\server\target\classes\com\lease\examples\le001\server\service\impl\WechatPayServiceImpl.class]
+Parameter 0 of constructor in PayController required a single bean, but 2 were found:
+	- alipayPayServiceImpl: defined in file [***AlipayPayServiceImpl.class]
+	- wechatPayServiceImpl: defined in file [***WechatPayServiceImpl.class]
 
 
 Action:
@@ -261,7 +261,6 @@ public class PayServiceFactory {
 使用层的定义：
 ```java
 
-import com.lease.examples.le001.server.service.PayServiceFactory;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -332,7 +331,6 @@ app-service-impl-wechat -> app-service
 app-service-impl-20231007版本的DemoServiceImpl代码如下：
 
 ```java
-import com.lease.examples.le001.server.service.DemoService;
 import org.springframework.stereotype.Service;
 
 @Service
