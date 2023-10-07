@@ -353,7 +353,9 @@ public class DemoServiceImpl implements DemoService {
 
 对应不同的业务逻辑，我们可以通过引入不同的module或者替换不同的jar包来实现。
 
-例如我们希望只提供微信支付时，则可以只引入app-service-impl-wechat模块或者只保留app-service-impl-wechat的jar包即可。
+例如我们希望只提供微信支付时，则可以只保留app-service-impl-wechat的jar包即可。
+
+![替换jar](images/img_3.png)
 
 ### 当需要同时兼容多种场景时
 
@@ -362,3 +364,15 @@ public class DemoServiceImpl implements DemoService {
 例如我们希望同时提供微信支付和支付宝支付时，则可以同时引入app-service-impl-wechat和app-service-impl-alipay模块的jar包即可。
 
 假如还需要支持银行卡支付，那么我们只需要增加并实现app-service-impl-bank模块，然后将其jar直接放入lib下即可。
+
+![替换jar](images/img_4.png)
+
+## 总结
+
+1. 通过引入模块分离的方式，可以很好的解决service层的局限性问题，同时也可以很好的支持业务的拓展。
+2. 通过模块的版本管理，可以更好的控制并管理业务的变更，同时也可以很好的支持多版本的并存。
+3. 通过jar包的引入管理，可实现在不需要调整任何代码的情况下，即可实现控制业务的切换。
+
+补充说明：  
+其实上述模块化分离的思想来源与领域驱动设计防腐层设计，在领域驱动设计中基础设施层与领域层之间的交互，需要通过防腐层来实现。防腐层的作用是将基础设施层的接口转换为领域层的接口，从而实现领域层与基础设施层的解耦。在实际的项目开发过程中，我们可以将领域层的接口定义为app-service模块，将基础设施层的接口定义为app-service-impl模块，将防腐层的接口定义为app-server模块。通过这样的方式，可以很好的实现领域层与基础设施层的解耦，同时也可以很好的支持业务的拓展。
+由于领域驱动设计的提出基础设施层的概念就是为了支持可被替换的，所以在实际的项目开发过程中，我们可以将app-service-impl模块的代码实现为基础设施层的接口，例如：数据库、缓存、消息队列等。这样的话，我们就可以很好的支持业务的拓展，同时也可以很好的支持业务的切换。
