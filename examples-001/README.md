@@ -313,7 +313,7 @@ public class BalancePayServiceImpl implements PayService {
 
 我们简单的将示例功能代码分为app-server、app-service、app-service-impl三个模块，其中app-server为服务接口模块，app-service为service定义层，app-service-impl为service实现层。根据业务的需求app-service-impl有细分为app-service-impl-alipay和app-service-impl-wechat等不同的实现模块。
 
-![模块分离](images/img_1.png)
+![模块分离](images/img_1.png)   
 依赖关系如下：
 ```
 app-service 没有依赖
@@ -346,3 +346,19 @@ public class DemoServiceImpl implements DemoService {
 
 ```
 在项目app-server中只需要修改引入的module就可以切换对应的版本。还可以直接替换对应的jar包来实现。
+
+![替换jar](images/img_2.png)   
+
+### 当存在差异化的业务逻辑时
+
+对应不同的业务逻辑，我们可以通过引入不同的module或者替换不同的jar包来实现。
+
+例如我们希望只提供微信支付时，则可以只引入app-service-impl-wechat模块或者只保留app-service-impl-wechat的jar包即可。
+
+### 当需要同时兼容多种场景时
+
+对应不同的场景，我们可以通过引入不同的module或者替换不同的jar包来实现。
+
+例如我们希望同时提供微信支付和支付宝支付时，则可以同时引入app-service-impl-wechat和app-service-impl-alipay模块的jar包即可。
+
+假如还需要支持银行卡支付，那么我们只需要增加并实现app-service-impl-bank模块，然后将其jar直接放入lib下即可。
