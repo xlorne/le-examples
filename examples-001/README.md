@@ -2,10 +2,10 @@
 
 lorne 2023-10-07  
 
-## Service层使用过程介绍
+## Service层的简单介绍
 
-Service层是再很多架构中都会经常被使用的一层，它的作用是将业务逻辑封装起来，包装到一个service类中。
-在日常的项目开发过程中，通常会将service分为接口定义层和实现层。
+Service层是经常被使用到的架构设计，它的作用是将业务逻辑封装起来提供模块化的业务能力。  
+我们在日常的项目开发过程中，通常会将service分为接口定义层和实现层。
 
 例如：
 
@@ -53,13 +53,13 @@ public class DemoController {
 
 ```
 
-## Service接口定义的左右何在？
+## Service层接口的作用是什么？
 
-在上述的例子过程中，我们定义了接口和实现，然后在项目中使用接口而不是实现来访问service，感觉像是有非常好的解耦效果，但是实际呢？
+在上述的例子过程中，我们定义了接口和实现，然后在项目中使用接口调用业务，由于接口与实现的分离感觉像是用了非常好的解耦效果，但是实际作用多大呢？
 
 下面以场景举例，说明  
-1. 假如我们需要重写service的逻辑，目前的做法是怎样的？  
-通常大家的处理方式可能是直接修改DemoServiceImpl的代码。例如：  
+### 当需要重写service的逻辑时，该怎么做？  
+假如我们需要将hello方法的返回信息，更改为`new Hello World!`，通常大家的处理方式是直接修改DemoServiceImpl的代码。例如：  
 ```java
 
 @Service
@@ -72,14 +72,16 @@ public class DemoServiceImpl implements DemoService {
 }
 
 ```
-如果我们这样去做的话，其实与其定义接口的意义就没有了，因为我们直接修改了实现层的代码，那么接口的定义就没有任何意义了。
+如果我们这样去做的话，其实定义service层接口的意义在哪呢？需要调整的时候还是直接修改实现层的代码，那么接口的定义就没有意义了。
 
-总结来说：  
-这个场景表达的含义是业务需求做了调整，对于我们实现来说不得不去修改逻辑来应对调整，但是当我们这样去做了以后，你将感觉不到service层定义接口的任何价值，只会感觉到service多写一次接口反而更加麻烦。
+总结来说：    
+这个场景表达的含义是业务需求做了调整，对于我们实现来说不得不去修改逻辑来应对调整，但是当我们这样去做了以后，将感觉不到service层接口定义的任何价值，只会感觉到service的接口需要多建一个类反而更加麻烦。
 
-2. 假如我们开发一个支付功能，需要支持微信和支付宝两种不同方式的支付，那么我们的service层应该如何设计？
+### 当需要兼容适配不同场景时，该怎么做？
 
-如下为了简化，我们直接定义一个PayService的代码。例如：
+例如我们需要开发一个支付功能，需要同时支持微信和支付宝两种不同方式的支付方式，那么我们的service层应该如何设计？
+
+如下为了简化业务关注与设计，我们直接定义一个PayService的代码。例如：
     
 ```java
 public interface PayService {
@@ -89,22 +91,7 @@ public interface PayService {
 }
 ```
 
-对应我们需要写两种不同的实现，分别是WechatPayServiceImpl和AlipayPayServiceImpl。例如：
-
-```java
-
-@Service
-public class AlipayPayServiceImpl implements PayService {
-
-    @Override
-    public String pay() {
-        return "alipay pay";
-    }
-}
-
-```
-
-
+对应不同的实现，需要写不同的实现类，分别是WechatPayServiceImpl和AlipayPayServiceImpl。  
 ```java
 
 @Service
@@ -119,10 +106,20 @@ public class WechatPayServiceImpl implements PayService {
 
 ```
 
-当我们定义了多个Service的实现的时候，我们在使用Service的时候还需要做区分，如果直接注入PayService的话，将会报错
-因为Spring无法判断我们需要注入哪个实现，例如：
+```java
 
-错误示范如下：
+@Service
+public class AlipayPayServiceImpl implements PayService {
+
+    @Override
+    public String pay() {
+        return "alipay pay";
+    }
+}
+
+```
+
+当我们定义了多个Service的实现的时候，我们在使用Service的时候还需要做区分，如果直接注入PayService的话，将会出错，因为Spring无法判断我们需要注入哪个实现，错误示范如下：
 
 ```java
 @RestController
@@ -159,6 +156,7 @@ Action:
 
 Consider marking one of the beans as @Primary, updating the consumer to accept multiple beans, or using @Qualifier to identify the bean that should be consumed
 ```
+
 让我们处理一下错误，做一个正确的示范：  
 
 接口层的调整：  
@@ -258,14 +256,13 @@ public class PayController {
 
 ```
 
-总结说明：
-当我们需要切换不同的Service的实现的时候，还需要做额外的处理，不然在直接注入Service的时候还将会出现错误。   
-虽然在需要切换的场景下，service层是比较方便，可以通过增加新的实现的方式实现对新的实现的切换，但是在使用的时候还需要引入Factory来做额外的处理，实际上这样的处理的方法是得力于策略模式的引入，而非service层的优势。
+总结说明：   
+1. 当我们需要切换不同Service的实现的时候，还需要做额外的处理，不然在直接注入Service的时候还将会出现错误。   
+2. 通过引入[策略模式](https://www.runoob.com/design-pattern/strategy-pattern.html)来适配service层是比较方便，可通过添加新的实现拓展新的业务能力，不过实际上这样的处理方式是得力于策略模式的引入而非service层的优势。
 
-![](images/img.png)
-[策略模式介绍](https://www.runoob.com/design-pattern/strategy-pattern.html)
+![策略模式](images/img.png)
 
-通过策略模式的引入，我们可以非常简单的实现通过增加一个新的实现来实现对新的实现的切换. 例如我们增加一个余额支付
+不过通过策略模式的引入，可以非常简单的通过添加新的实现来增加新的业务能力，是开闭原则的一种很好的示例. 例如我们增加一个余额支付。
 ```java
 
 @Service
